@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from langchain.chat_models import init_chat_model
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.prompts import ChatPromptTemplate
 
 
 def main():
@@ -13,13 +14,14 @@ def main():
         os.environ["GOOGLE_API_KEY"] = getpass.getpass(
             "Enter API key for Google Gemini: "
         )
-
+    system_template = "Translate the following from English into {language}"
+    prompt_template = ChatPromptTemplate.from_messages(
+        [("system", system_template), ("user", "{text}")]
+    )
+    prompt = prompt_template.invoke({"language": "Italian", "text": "hi!"})
     model = init_chat_model("gemini-2.5-flash", model_provider="google_genai")
-    messages = [
-        SystemMessage(content="Translate the following from English into Italian"),
-        HumanMessage(content="hi!"),
-    ]
-    print(model.invoke(messages))
+    response = model.invoke(prompt)
+    print(response.content)
 
 
 if __name__ == "__main__":
